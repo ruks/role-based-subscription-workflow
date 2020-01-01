@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:p="http://www.w3.org/2001/XMLSchema" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://workflow.subscription.apimgt.carbon.wso2.org" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:wsdl="http://org.wso2.carbon/subscriptions/" xmlns:wsdl1="http://callback.workflow.apimgt.carbon.wso2.org" name="SubscriptionApprovalWorkFlowProcess" targetNamespace="http://workflow.subscription.apimgt.carbon.wso2.org">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     TYPE DEFINITION - List of services participating in this BPEL process 
+     The default output of the BPEL designer uses strings as input and 
+     output to the BPEL Process. But you can define or import any XML 
+     Schema type and us them as part of the message types.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="SAPLT">
+    <plnk:role name="role1" portType="wsdl:SubscriptionsHandlingPT"/>
+    <plnk:role name="role2" portType="wsdl:SubscriptionsHandlingCallbackPT"/>
+  </plnk:partnerLinkType>
+    <plnk:partnerLinkType name="responsePLT">
+    <plnk:role name="role1" portType="wsdl1:WorkflowCallbackServicePortType"/>
+  </plnk:partnerLinkType>
+    <plnk:partnerLinkType name="CBPLT">
+    <plnk:role name="role3" portType="wsdl1:WorkflowCallbackServicePortType"/>
+  </plnk:partnerLinkType>
+    <vprop:property name="workflowRef" type="p:string"/>
+    <vprop:propertyAlias messageType="tns:cancelRequest" part="parameters" propertyName="tns:workflowRef">
+        <vprop:query><![CDATA[/tns:workflowExtRef]]></vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:SubscriptionApprovalWorkFlowProcessRequestMessage" part="payload" propertyName="tns:workflowRef">
+        <vprop:query><![CDATA[/tns:workflowExternalRef]]></vprop:query>
+    </vprop:propertyAlias>
+    <import location="SubscriptionsApprovalTaskService.wsdl" namespace="http://org.wso2.carbon/subscriptions/"/>
+    <import location="WorkflowCallbackService.wsdl" namespace="http://callback.workflow.apimgt.carbon.wso2.org"/>
+    <types>  
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://workflow.subscription.apimgt.carbon.wso2.org">
+                
+            <element name="SubscriptionApprovalWorkFlowProcessRequest">
+                <complexType>
+                    <sequence>
+					<element name="apiName" type="string"/>
+					<element name="apiVersion" type="string"/>
+					<element name="apiContext" type="string"/>
+					<element name="apiProvider" type="string"/>
+					<element name="subscriber" type="string"/>
+					<element name="applicationName" type="string">
+					</element>
+					<element name="tierName" type="string"/>
+					<element name="callBackURL" type="string"/>
+					<element name="workflowExternalRef" type="string"/>
+					<element name="deptAdminRole" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+                  
+            <element name="SubscriptionApprovalWorkFlowProcessResponse">
+                <complexType>
+                    <sequence>
+        			<element name="status" type="string"/>
+                                <element name="workflowExternalRef" type="string"/>
+                                <element name="description" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            
+            <element name="cancel">
+            	<complexType>
+            		<sequence>
+            			<element name="in" type="string"/>
+            		</sequence>
+            	</complexType>
+            </element>
+            <element name="cancelResponse">
+            	<complexType>
+            		<sequence>
+            			<element name="out" type="string"/>
+            		</sequence>
+            	</complexType>
+            </element>
+            <element name="CancelSubscriptionApprovalWorkflowProcessRequest" type="tns:SubscriptionApprovalWorkflowProcessType">
+            </element>
+            
+        
+            <complexType name="SubscriptionApprovalWorkflowProcessType">
+            	<sequence>
+            		<element name="workflowExtRef" type="string"/>
+            	</sequence>
+            </complexType>
+        </schema>
+    </types>
+  
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     MESSAGE TYPE DEFINITION - Definition of the message types used as 
+     part of the port type defintions
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <message name="SubscriptionApprovalWorkFlowProcessRequestMessage">
+        <part element="tns:SubscriptionApprovalWorkFlowProcessRequest" name="payload"/>
+    </message>
+
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PORT TYPE DEFINITION - A port type groups a set of operations into
+     a logical service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- portType implemented by the SubscriptionApprovalWorkFlowProcess BPEL process -->
+    <message name="cancelRequest">
+    	<part element="tns:CancelSubscriptionApprovalWorkflowProcessRequest" name="parameters"/>
+    </message>
+    <message name="cancelResponse">
+    	<part element="tns:cancelResponse" name="parameters"/>
+    </message>
+    <portType name="SubscriptionApprovalWorkFlowProcess">
+        <operation name="initiate">
+            <input message="tns:SubscriptionApprovalWorkFlowProcessRequestMessage"/>
+        </operation>
+        <operation name="cancel">
+        	<input message="tns:cancelRequest"/>
+        </operation>
+    </portType>
+
+
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNER LINK TYPE DEFINITION
+         the SubscriptionApprovalWorkFlowProcess partnerLinkType binds the provider and
+         requester portType into an asynchronous conversation.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="SubscriptionApprovalWorkFlowProcess">
+        <plnk:role name="SubscriptionApprovalWorkFlowProcessProvider" portType="tns:SubscriptionApprovalWorkFlowProcess"/>
+
+    </plnk:partnerLinkType>   
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     BINDING DEFINITION - Defines the message format and protocol details
+     for a web service.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <binding name="SubscriptionApprovalWorkFlowProcessBinding" type="tns:SubscriptionApprovalWorkFlowProcess">
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    	<operation name="initiate">
+    		<soap:operation soapAction="http://workflow.subscription.apimgt.carbon.wso2.org/initiate"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="cancel">
+    		<soap:operation soapAction="http://workflow.subscription.apimgt.carbon.wso2.org/cancel"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    </binding>
+
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     SERVICE DEFINITION - A service groups a set of ports into
+     a service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <service name="SubscriptionApprovalWorkFlowProcess">
+        <port binding="tns:SubscriptionApprovalWorkFlowProcessBinding" name="SubscriptionApprovalWorkFlowProcessPort">
+    		<soap:address location="http://localhost:8080/SubscriptionApprovalWorkFlowProcess"/>
+        </port>
+    </service>
+
+
+</definitions>

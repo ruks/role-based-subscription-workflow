@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:_1="http://wso2.org/bps/bpel/endpoint/config" xmlns:b4p="http://docs.oasis-open.org/ns/bpel4people/bpel4people/200803" xmlns:callback.workflow.apimgt.carbon.wso2.org="http://callback.workflow.apimgt.carbon.wso2.org" xmlns:subscriptions="http://org.wso2.carbon/subscriptions/" xmlns:workflow.subscription.apimgt.carbon.wso2.org="http://workflow.subscription.apimgt.carbon.wso2.org">
+  <process name="workflow.subscription.apimgt.carbon.wso2.org:SubscriptionApprovalWorkFlowProcess">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events>
+      <enable-event>instanceLifecycle</enable-event>
+    </process-events>
+    <provide partnerLink="client">
+      <service name="workflow.subscription.apimgt.carbon.wso2.org:SubscriptionApprovalWorkFlowProcess" port="SubscriptionApprovalWorkFlowProcessPort"/>
+    </provide>
+    <provide partnerLink="SAPL" correlationFilter="b4p:b4pFilter">
+      <service name="subscriptions:SubscriptionServiceCB" port="SubscriptionPortCB"/>
+    </provide>
+    <invoke partnerLink="SAPL">
+      <service name="subscriptions:SubscriptionService" port="SubscriptionPort">
+        <_1:endpoint endpointReference="./../../../../repository/conf/epr/SubscriptionService.epr"/>
+      </service>
+    </invoke>
+    <invoke partnerLink="CBPL">
+      <service name="callback.workflow.apimgt.carbon.wso2.org:WorkflowCallbackService" port="WorkflowCallbackServiceHttpsSoap11Endpoint">
+        <_1:endpoint endpointReference="./../../../../repository/conf/epr/SubscriptionCallbackService.epr"/>
+      </service>
+    </invoke>
+  </process>
+</deploy>
